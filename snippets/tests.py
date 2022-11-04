@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client, RequestFactory
-
 from django.urls import resolve
+
+from snippets.models import Snippet
 from snippets.views import top, snippet_new, snippet_edit, snippet_detail
 
 UserModel = get_user_model()
@@ -48,9 +49,27 @@ class CreateSnippetTest(TestCase):
         self.assertEqual(snippet_new, found.func)
 
 class SnippetDetailTest(TestCase):
-    def test_should_resolve_snippet_detail(self):
-        found = resolve('/snippets/1/')
-        self.assertEqual(snippet_detail, found.func)
+    def setUp(self):
+        self.user = UserModel.objects.create(
+            username='test_user',
+            email='test@example.com',
+            password='secret',
+        )
+        self.snippet = Snippet.objects.create(
+            title='タイトル',
+            code='コード',
+            description='解説',
+            created_by=self.user,
+        )
+
+    def test_should_use_expected_template(self):
+        response = self.client.get(f'/snippets/{self.snippet.id}/')
+        self.assertTemplateUsed(response, 'snippets/snippet_detail.html')
+
+    def test_top_page_returns_200_and_heading(self):
+        response = self.client.get(f'/snippets/{self.snippet.id}/')
+        self.assertContains(response, self.snippet.title, status_code=200)
+
 
 class EditSnippetTest(TestCase):
     def test_should_resolve_snippet_edit(self):
