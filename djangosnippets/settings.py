@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'snippets.apps.SnippetsConfig',
+    'accounts.apps.AccountsConfig',
     'django_bootstrap5',
     'pygments_renderer',
 ]
